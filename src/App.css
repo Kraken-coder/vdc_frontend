@@ -100,12 +100,14 @@ body {
   align-items: center;
   box-shadow: 0 2px 4px var(--shadow);
   z-index: 10;
+  position: relative;
 }
 
 .app-header h1 {
   font-size: 20px;
   font-weight: 600;
   margin: 0;
+  flex: 1;
 }
 
 .connection-status {
@@ -154,17 +156,17 @@ body {
 .mobile-menu-button {
   display: none;
   position: fixed;
-  top: 70px;
+  top: 75px;
   left: 16px;
-  z-index: 1001;
+  z-index: 999;
   background: var(--primary-color);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s, background-color 0.2s;
 }
 
@@ -395,12 +397,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .chat-user-info {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .chat-avatar {
@@ -413,18 +419,26 @@ body {
   justify-content: center;
   color: white;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .chat-user-info h3 {
   color: var(--text-primary);
   font-size: 16px;
   font-weight: 600;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-status {
   font-size: 13px;
   color: var(--text-secondary);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Messages Container */
@@ -558,6 +572,7 @@ body {
   display: flex;
   gap: 12px;
   align-items: flex-end;
+  flex-wrap: nowrap;
 }
 
 .message-input {
@@ -572,6 +587,7 @@ body {
   outline: none;
   transition: border-color 0.2s;
   max-height: 120px;
+  min-width: 0;
 }
 
 .message-input:focus {
@@ -584,7 +600,7 @@ body {
 }
 
 .send-button {
-  padding: 12px 24px;
+  padding: 12px 20px;
   background: var(--primary-color);
   color: white;
   border: none;
@@ -594,9 +610,12 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .send-button:hover:not(:disabled) {
@@ -911,8 +930,24 @@ body {
     display: flex;
   }
   
+  .app-header {
+    padding: 14px 16px;
+  }
+  
   .app-header h1 {
     font-size: 18px;
+  }
+  
+  .chat-header {
+    padding: 12px 16px;
+  }
+  
+  .chat-user-info h3 {
+    font-size: 15px;
+  }
+  
+  .user-status {
+    font-size: 12px;
   }
   
   .conversation-avatar,
@@ -926,8 +961,23 @@ body {
     max-width: 90%;
   }
   
-  .send-button svg {
-    margin-right: 0;
+  .message-input-container {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+  
+  .message-input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+  
+  .send-button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .send-button span {
+    display: none;
   }
   
   .connection-status span {
@@ -954,39 +1004,51 @@ body {
     padding: 12px 16px;
   }
   
+  .app-header h1 {
+    font-size: 16px;
+  }
+  
   .sidebar {
     width: 90%;
     max-width: 280px;
   }
   
   .mobile-menu-button {
-    width: 44px;
-    height: 44px;
-    top: 65px;
+    width: 52px;
+    height: 52px;
+    top: 70px;
     left: 12px;
   }
   
+  .chat-header {
+    padding: 10px 12px;
+  }
+  
+  .chat-user-info {
+    gap: 8px;
+  }
+  
+  .chat-user-info h3 {
+    font-size: 14px;
+  }
+  
+  .user-status {
+    font-size: 11px;
+  }
+  
   .message-input-container {
-    padding: 12px;
-    flex-direction: column;
+    padding: 10px 12px;
     gap: 8px;
   }
   
   .message-input {
-    min-height: 60px;
+    min-height: 44px;
+    font-size: 14px;
   }
   
   .send-button {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .app-header h1 {
-    font-size: 16px;
-  }
-  
-  .chat-header {
-    padding: 12px 16px;
+    padding: 12px;
+    min-width: 44px;
   }
   
   .conversation-name {
@@ -995,6 +1057,11 @@ body {
   
   .message-content {
     max-width: 85%;
+    padding: 6px 10px;
+  }
+  
+  .message-text {
+    font-size: 13px;
   }
   
   .login-box {

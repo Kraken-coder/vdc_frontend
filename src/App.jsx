@@ -23,6 +23,12 @@ function App() {
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
   const reconnectTimeoutRef = useRef(null)
+  const selectedPhoneRef = useRef(null)
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    selectedPhoneRef.current = selectedPhone
+  }, [selectedPhone])
 
   // Auto-scroll to bottom of messages
   const scrollToBottom = () => {
@@ -141,6 +147,15 @@ function App() {
           // Handle real-time updates from DynamoDB
           if (data.type === 'dynamodb_update' && data.action === 'new_message') {
             const newMessage = data.data
+            const currentSelectedPhone = selectedPhoneRef.current
+            
+            console.log('📨 Received new message:', {
+              phone: newMessage.phone_number,
+              source: newMessage.source,
+              messagePreview: newMessage.message?.substring(0, 30),
+              currentSelectedPhone,
+              isForCurrentChat: newMessage.phone_number === currentSelectedPhone
+            })
             
             // Check if message already exists to prevent duplicates
             setMessages(prev => {
@@ -152,30 +167,43 @@ function App() {
               )
               
               if (isDuplicate) {
-                console.log('Duplicate message detected, skipping...')
+                console.log('⚠️ Duplicate message detected in main list, skipping...')
                 return prev
               }
               
+              console.log('✅ Adding message to sidebar list')
               return [newMessage, ...prev]
             })
             
             // Also update chat messages if this conversation is selected
-            if (newMessage.phone_number === selectedPhone) {
+            if (newMessage.phone_number === currentSelectedPhone) {
+              console.log('🔄 Updating chat messages for current conversation')
               setChatMessages(prev => {
+                console.log('Current chat messages count:', prev.length)
+                
+                // Simple duplicate check - exact match on timestamp, message, and source
                 const isDuplicate = prev.some(msg => 
                   msg.timestamp === newMessage.timestamp &&
                   msg.message === newMessage.message &&
                   msg.source === newMessage.source
                 )
-                if (!isDuplicate) {
-                  return [...prev, newMessage]
+                
+                if (isDuplicate) {
+                  console.log('⚠️ Duplicate message detected in chat, skipping...')
+                  return prev
                 }
-                return prev
+                console.log('✅ Adding new message to chat:', newMessage.message.substring(0, 50))
+                return [...prev, newMessage]
               })
+              
+              // Scroll to bottom when new message arrives
+              setTimeout(() => scrollToBottom(), 100)
+            } else {
+              console.log('ℹ️ Message is for different conversation, not updating chat view')
             }
             
-            // Show notification for new message (only for non-intervention messages)
-            if (newMessage.source !== 'Human_Intervention') {
+            // Show notification for new message from OTHER conversations (not currently selected)
+            if (newMessage.source !== 'Human_Intervention' && newMessage.phone_number !== currentSelectedPhone) {
               showNotification(`New message from ${formatPhoneNumber(newMessage.phone_number)}`, 'info')
             }
           }
@@ -246,7 +274,7 @@ function App() {
     }
 
     ws.send(JSON.stringify(payload))
-    showNotification('Message sent', 'success')
+    showNotification('Sending message...', 'info')
     setMessageInput('')
   }
 
@@ -845,12 +873,13 @@ function App() {
                   onClick={sendMessage}
                   className="send-button"
                   disabled={!connected || !messageInput.trim()}
+                  aria-label="Send message"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  Send
+                  <span>Send</span>
                 </button>
               </div>
             </>
