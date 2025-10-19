@@ -19,6 +19,7 @@ function App() {
   const [chatMessages, setChatMessages] = useState([])
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false)
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
   const reconnectTimeoutRef = useRef(null)
@@ -85,6 +86,20 @@ function App() {
           if (data.action === 'get_data_response' || data.action === 'get_data_response    ') {
             if (data.data && Array.isArray(data.data)) {
               setMessages(data.data)
+              
+              // Extract unique phone numbers and fetch user info for each
+              const uniquePhones = [...new Set(data.data.map(msg => msg.phone_number))]
+              console.log(`Fetching user info for ${uniquePhones.length} users`)
+              
+              // Fetch user info for all unique phone numbers
+              uniquePhones.forEach(phone => {
+                if (phone) {
+                  websocket.send(JSON.stringify({
+                    action: 'get_user_info',
+                    phone: phone
+                  }))
+                }
+              })
             }
           }
           
@@ -473,10 +488,15 @@ function App() {
   }
 
   const conversations = getConversations()
-  const filteredConversations = conversations.filter(conv =>
-    conv.phone.includes(searchQuery) ||
-    conv.lastMessage.message?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredConversations = conversations.filter(conv => {
+    const userName = getUserName(conv.phone).toLowerCase()
+    const query = searchQuery.toLowerCase()
+    return (
+      conv.phone.includes(searchQuery) ||
+      userName.includes(query) ||
+      conv.lastMessage.message?.toLowerCase().includes(query)
+    )
+  })
 
   return (
     <div className="app">
@@ -541,11 +561,29 @@ function App() {
         </div>
       ) : (
       <div className="app-container">
+        {/* Mobile Menu Button */}
+        <button 
+          className="mobile-menu-button"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          aria-label="Toggle sidebar"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
+
         {/* Sidebar - Conversations List */}
-        <div className="sidebar">
+        <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="sidebar-header">
             <h2>Conversations</h2>
             <div className="conversation-count">{conversations.length}</div>
+            <button 
+              className="close-sidebar-button"
+              onClick={() => setSidebarCollapsed(true)}
+              aria-label="Close sidebar"
+            >
+              ×
+            </button>
           </div>
           
           <div className="search-container">
@@ -574,6 +612,10 @@ function App() {
                     setHasMoreMessages(true)
                     fetchUserInfo(conv.phone)
                     fetchChatMessages(conv.phone)
+                    // Close sidebar on mobile after selection
+                    if (window.innerWidth <= 768) {
+                      setSidebarCollapsed(true)
+                    }
                   }}
                 >
                   <div className="conversation-avatar">
