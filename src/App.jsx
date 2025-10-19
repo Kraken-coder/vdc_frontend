@@ -138,7 +138,17 @@ function App() {
               if (data.data.length === 0) {
                 setHasMoreMessages(false)
               } else {
-                setChatMessages(prev => [...data.data, ...prev])
+                setChatMessages(prev => {
+                  const isInitialLoad = prev.length === 0
+                  const newMessages = [...data.data, ...prev]
+                  
+                  // Scroll to bottom after initial load (when clicking a conversation)
+                  if (isInitialLoad) {
+                    setTimeout(() => scrollToBottom(), 100)
+                  }
+                  
+                  return newMessages
+                })
               }
               setLoadingMoreMessages(false)
             }
