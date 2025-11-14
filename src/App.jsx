@@ -114,12 +114,21 @@ function App() {
             console.log('Received user info:', data)
             if (data.data) {
               // Extract phone number from the data
-              const phoneNumber = data.data['Please enter your phone number with the country code without the + sign.\nExample: 91__________']
+              let phoneNumber = data.data['Please enter your phone number with the country code without the + sign.\nExample: 91__________']
+              
               if (phoneNumber) {
+                // Ensure phone number is a string and has country code
+                phoneNumber = phoneNumber.toString()
+                
+                // If phone number doesn't start with 91, add it
+                if (!phoneNumber.startsWith('91') && phoneNumber.length === 10) {
+                  phoneNumber = '91' + phoneNumber
+                }
+                
                 console.log('Storing user info for phone:', phoneNumber)
                 setUserInfo(prev => ({
                   ...prev,
-                  [phoneNumber.toString()]: data.data
+                  [phoneNumber]: data.data
                 }))
               } else {
                 // Fallback to selectedPhone if phone number not in data
