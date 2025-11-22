@@ -91,7 +91,18 @@ function App() {
           // Handle initial data load
           if (data.action === 'get_data_response' || data.action === 'get_data_response    ') {
             if (data.data && Array.isArray(data.data)) {
-              setMessages(data.data)
+              // Handle chunked data
+              if (data.chunk_index !== undefined) {
+                if (data.chunk_index === 0) {
+                  setMessages(data.data)
+                } else {
+                  setMessages(prev => [...prev, ...data.data])
+                }
+                console.log(`Received chunk ${data.chunk_index + 1}/${data.total_chunks} with ${data.data.length} messages`)
+              } else {
+                // Legacy support for non-chunked data
+                setMessages(data.data)
+              }
               
               // Extract unique phone numbers and fetch user info for each
               const uniquePhones = [...new Set(data.data.map(msg => msg.phone_number))]
