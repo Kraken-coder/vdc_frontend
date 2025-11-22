@@ -350,7 +350,7 @@ function App() {
     const payload = {
       action: 'send_payment_link',
       phone: selectedPhone,
-      amount: parseInt(paymentAmount),
+      amount: parseInt(paymentAmount) * 100,  // Convert rupees to paise
       duration: paymentDuration
     }
 
