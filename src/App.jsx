@@ -16,6 +16,9 @@ function App() {
   const [notification, setNotification] = useState(null)
   const [userInfo, setUserInfo] = useState({})
   const [showUserInfo, setShowUserInfo] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [paymentAmount, setPaymentAmount] = useState(3000)
+  const [paymentDuration, setPaymentDuration] = useState('30')
   const [chatMessages, setChatMessages] = useState([])
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false)
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
@@ -174,6 +177,15 @@ function App() {
             }
           }
           
+          // Handle payment link response
+          if (data.action === 'payment_link_response') {
+            if (data.status === 'success') {
+              showNotification('Payment link sent successfully', 'success')
+            } else {
+              showNotification('Failed to send payment link', 'error')
+            }
+          }
+
           // Handle real-time updates from DynamoDB
           if (data.type === 'dynamodb_update' && data.action === 'new_message') {
             const newMessage = data.data
@@ -330,6 +342,21 @@ function App() {
     }
     
     ws.send(JSON.stringify(payload))
+  }
+
+  const sendPaymentLink = () => {
+    if (!selectedPhone || !ws || !connected) return
+
+    const payload = {
+      action: 'send_payment_link',
+      phone: selectedPhone,
+      amount: parseInt(paymentAmount),
+      duration: paymentDuration
+    }
+
+    ws.send(JSON.stringify(payload))
+    showNotification('Sending payment link...', 'info')
+    setShowPaymentModal(false)
   }
 
   const loadMoreMessages = () => {
@@ -724,6 +751,16 @@ function App() {
                   </div>
                 </div>
                 <button 
+                  className="payment-button"
+                  onClick={() => setShowPaymentModal(true)}
+                  title="Send Payment Link"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                  </svg>
+                </button>
+                <button 
                   className="info-button"
                   onClick={() => {
                     console.log('Info button clicked. Current state:', {
@@ -922,6 +959,64 @@ function App() {
           )}
         </div>
       </div>
+      )}
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Send Payment Link</h3>
+              <button 
+                className="close-button"
+                onClick={() => setShowPaymentModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label htmlFor="amount">Amount (INR)</label>
+                <input
+                  id="amount"
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className="login-input"
+                  min="1"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="duration">Duration (Days)</label>
+                <select
+                  id="duration"
+                  value={paymentDuration}
+                  onChange={(e) => setPaymentDuration(e.target.value)}
+                  className="login-input"
+                >
+                  <option value="30">30 Days</option>
+                  <option value="60">60 Days</option>
+                  <option value="90">90 Days</option>
+                  <option value="180">180 Days</option>
+                  <option value="365">365 Days</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button 
+                className="modal-button secondary"
+                onClick={() => setShowPaymentModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="modal-button primary"
+                onClick={sendPaymentLink}
+              >
+                Send Link
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
