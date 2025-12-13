@@ -128,7 +128,7 @@ function App() {
             console.log('Received user info:', data)
             if (data.data) {
               // Extract phone number from the data
-              let phoneNumber = data.data['Please enter your phone number with the country code without the + sign.\nExample: 91__________']
+              let phoneNumber = data.data["Please enter your what's app number"]
               
               if (phoneNumber) {
                 // Ensure phone number is a string and has country code
@@ -803,10 +803,10 @@ function App() {
                           <span className="info-value">{userInfo[selectedPhone].Name}</span>
                         </div>
                       )}
-                      {userInfo[selectedPhone].Age && (
+                      {userInfo[selectedPhone]['Age (years)'] && (
                         <div className="info-item">
                           <span className="info-label">Age:</span>
-                          <span className="info-value">{userInfo[selectedPhone].Age}</span>
+                          <span className="info-value">{userInfo[selectedPhone]['Age (years)']}</span>
                         </div>
                       )}
                       {userInfo[selectedPhone]['Biological sex '] && (
@@ -851,16 +851,16 @@ function App() {
                           <span className="info-value">{userInfo[selectedPhone]['Physical Activity Levels']}</span>
                         </div>
                       )}
-                      {userInfo[selectedPhone]['Health Problems '] && (
+                      {userInfo[selectedPhone]['Health Problems'] && (
                         <div className="info-item">
                           <span className="info-label">Health Issues:</span>
-                          <span className="info-value">{userInfo[selectedPhone]['Health Problems ']}</span>
+                          <span className="info-value">{userInfo[selectedPhone]['Health Problems']}</span>
                         </div>
                       )}
-                      {userInfo[selectedPhone]['Allergies from Food. none for no allergies'] && (
+                      {userInfo[selectedPhone]['Allergies from Food. None for no allergies'] && (
                         <div className="info-item">
                           <span className="info-label">Allergies:</span>
-                          <span className="info-value">{userInfo[selectedPhone]['Allergies from Food. none for no allergies']}</span>
+                          <span className="info-value">{userInfo[selectedPhone]['Allergies from Food. None for no allergies']}</span>
                         </div>
                       )}
                       {userInfo[selectedPhone]['Blood Group'] && (
